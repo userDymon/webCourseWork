@@ -34,7 +34,7 @@ export const getAll = async (req, res) => {
 export const getOne = async (req, res) => {
     try {
         const postId = req.params.id;
-        
+
         const updatedPost = await PostModel.findOneAndUpdate(
             {
                 _id: postId,
@@ -45,7 +45,7 @@ export const getOne = async (req, res) => {
             {
                 returnDocument: 'after',
             }
-        );
+        ).populate('user');
 
         if (!updatedPost) {
             return res.status(404).json({
@@ -86,19 +86,20 @@ export const remove = async (req, res) => {
 };
 
 export const create = async (req, res) => {
-    try{
+    try {
+        const tags = Array.isArray(req.body.tags) ? req.body.tags : req.body.tags.split(',');
+
         const doc = new PostModel({
             title: req.body.title,
             text: req.body.text,
             imageUrl: req.body.imageUrl,
-            tags: req.body.tags,
+            tags: tags,
             user: req.userId,
         });
 
         const post = await doc.save();
 
         res.json(post);
-
     } catch (err) {
         console.log(err);
         res.status(500).json({
@@ -106,6 +107,8 @@ export const create = async (req, res) => {
         });
     }
 };
+
+
 
 export const update = async (req, res) => {
     try{

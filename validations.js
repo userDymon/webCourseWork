@@ -36,7 +36,8 @@ export const postCreateValidation = [
         .withMessage("Text must be at least 10 characters long"),
     body('tags')
         .optional()
-        .isString(),
+        .isArray()
+        .withMessage("Incorrect tag format"),
     body('imageUrl')
         .optional()
         .isString(),
