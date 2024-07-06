@@ -114,6 +114,8 @@ export const update = async (req, res) => {
     try{
         const postId = req.params.id;
 
+        const tags = Array.isArray(req.body.tags) ? req.body.tags : req.body.tags.split(',');
+
         await PostModel.updateOne(
             {
                 _id: postId,
@@ -122,7 +124,7 @@ export const update = async (req, res) => {
                 title: req.body.title,
                 text: req.body.text,
                 imageUrl: req.body.imageUrl,
-                tags: req.body.tags,
+                tags: tags,
                 user: req.userId,
             }
         );
