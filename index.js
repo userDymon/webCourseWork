@@ -2,12 +2,14 @@ import express from "express";
 import fs from 'fs';
 import mongoose from "mongoose";
 import multer from "multer";
-
 import cors from 'cors';
+import dotenv from 'dotenv';
 
 import { registerValidation, loginValidation, postCreateValidation } from "./validations.js";
-import {handleValidationErrors, checkAuth} from './utils/index.js';
-import {UserController, PostController} from "./controllers/index.js";
+import { handleValidationErrors, checkAuth } from './utils/index.js';
+import { UserController, PostController } from "./controllers/index.js";
+
+dotenv.config();
 
 mongoose
     .connect(process.env.MONGODB_URI)
@@ -26,9 +28,9 @@ const storage = multer.diskStorage({
     filename: (_, file, cb) => {
       cb(null, file.originalname);
     },
-  });
-  
-  const upload = multer({ storage });
+});
+
+const upload = multer({ storage });
 
 app.use(express.json());
 app.use(cors());
@@ -58,6 +60,6 @@ app.listen(process.env.PORT || 4444, (err) => {
     if (err) {
         return console.log(err);
     }
-    
+
     console.log("Server started on port 4444");
 });
