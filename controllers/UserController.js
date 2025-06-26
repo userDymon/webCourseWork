@@ -23,7 +23,7 @@ export const register = async (req, res) => {
             {
                 _id: user._id,
             },
-            'secret123',
+            process.env.JWT_SECRET,
             {
                 expiresIn: '30d',
             },
@@ -44,46 +44,38 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-    try{
+    try {
+        console.log('Start login process');
         const user = await UserModel.findOne({ email: req.body.email });
         if (!user) {
-            return res.status(404).json({
-                message: 'User not found',
-            });
+            console.log('User not found');
+            return res.status(404).json({ message: 'User not found' });
         }
 
         const isValidPass = await bcrypt.compare(req.body.password, user._doc.passwordHash);
+        console.log('Password check:', isValidPass);
 
         if (!isValidPass) {
-            return res.status(404).json({
-                message: 'Password not valid',
-            });
+            return res.status(400).json({ message: 'Invalid password' });
         }
 
-        const token = jwt.sign(
-            {
-                _id: user._id,
-            },
-            'secret123',
-            {
-                expiresIn: '30d',
-            },
-        );
-        
-        const { passwordHash, ...userData } = user._doc;
+        let token;
+        try {
+            token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+        } catch (signErr) {
+            console.error('JWT error:', signErr);
+            return res.status(500).json({ message: 'Token error' });
+        }
 
-        res.json({
-            ...userData,
-            token,
-        });
+        const { passwordHash, ...userData } = user._doc;
+        res.json({ ...userData, token });
 
     } catch (err) {
-        console.log(err);
-        res.status(500).json({
-            message: 'Failed to login',
-        });
+        console.error('Login error:', err);
+        res.status(500).json({ message: 'Login failed' });
     }
 };
+
 
 export const getMe = async (req, res) => {
     try{
